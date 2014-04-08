@@ -27,7 +27,8 @@ var ChatApp = function() {
                         console.warn('No OPENSHIFT_INTERNAL_IP var, using 127.0.0.1');
                         self.ipaddress = "127.0.0.1";
                 };
-                console.log(self.ipaddress + ':' + self.port);
+                
+                self.slow = new self.slow();
         };
 
 
@@ -355,6 +356,149 @@ var ChatApp = function() {
                 });
         };
 
+        self.slow = (function () {
+                var vals = [ "0", "1", "*" ]
+
+                var sign = [
+                        "                                                 ",
+                        "                                                 ",
+                        "                            __                   ",
+                        "               apint/  ____/ /___ __             ",
+                        "                      / __/ __/\\ \\ /           ",
+                        "                     /_/  \\__//_\\_\\           ",
+                        "                                                 ",
+                        "                They are everywhere.             ",
+                        "                                                 ",
+                        "                                                 ",
+                        0,
+                        "                                                 ",
+                        "",
+                ], signEstate = {};
+
+                var lsign = ~~(Math.max.apply(Math, sign.map(function (v) {
+                        return v.length
+                })) / 2);
+
+                var avgmin = Math.max.apply(Math, (function() {
+                        var avg = 0; sign.forEach(function(a) { a.length && (avg += a.length); }); avg /= sign.length
+
+                        var max = Math.max.apply(Math, sign.map(function(v) {
+                                return v.length
+                        }));
+
+                        return sign.filter(function(v) {
+                                return (avg / v.length) < .9
+                        })
+                })().map(function(v) {
+                        return v.length
+                })); // remove outliers and get min
+
+                var nPad = function (n, x) { return Array.prototype.slice.apply(Array(n)).join(x||" ") }
+
+                var padState = function (state) {
+                        var max = ~~(avgmin / 2) + 4;
+                        var start = max - (state.length / 2);
+                          var end = ~~start - 1;
+
+                        var res;
+
+                        while ( (res = nPad(max - ~~(state.length/2 + 2)) + state + nPad(avgmin - state.length - end)).length < avgmin )
+                                --end;
+
+                        return res
+                }
+
+                var state = "Waiting..";
+
+                var drawSign = function (padding) {
+                        var y = process.stdout.rows,
+                            x = process.stdout.columns;
+
+                        var ay = ~~(y / 2) - ~~(sign.length / 2), ax = ~~(x / 2) - ~~(avgmin / 2);
+
+                        var write = function (str) { process.stdout.write(str) }
+
+                        for (var i = 1; i < sign.length; ++i) {
+                                var j = i + ay;
+                                var k = ax;
+
+                                if ( sign[i] !== 0 ) {
+                                        write("\u001B[" + (i + ay) + ";" + k + "f"),
+                                        write(sign[i]);
+                                } else {
+                                        write("\u001B[" + j + ";" + k + "f"),
+                                        write(padState(state));
+                                }
+                        }
+                }
+
+                var pause, stop;
+
+                var x = function (str) {
+                        state = str || state;
+
+                        setImmediate(function () {
+                                if (pause === true) return x();
+                                if (pause) return setTimeout(x, pause);
+                                if (stop) return false;
+
+                                var height = process.stdout.rows,
+                                    width  = process.stdout.columns;
+
+                                for ( var i = process.stdout.rows; i; --i)
+                                        process.stdout.write("\u001B[" + i + ";0f\u001B[2K");
+
+                                drawSign ();
+
+                                var h = ~~(Math.random() * height);
+                                var w = ~~(Math.random() * width);
+
+                                //process.stdout.write("\u001B[" + h + ";" + w + "f");
+                                //process.stdout.write(vals[~~(Math.random() * vals.length)]+"")
+
+                                //return x()
+                        })
+                };
+
+                x.prototype.drawSign = function (padding) {
+                        return drawSign(padding);
+                }
+
+                x.prototype.setState = function (str) {
+                        state = str;
+
+                        return drawSign();
+                }
+
+                x.prototype.reset = function () {
+                        for ( var i = process.stdout.rows; i; --i)
+                                process.stdout.write("\u001B[" + i + ";0f\u001B[2K");
+                }
+
+                x.prototype.resetScreen = function () {
+                        process.stdout.write("\u001B[2J");
+                }
+
+                // sets cursor to x 0 y 0
+                x.prototype.resetCursor = function () {
+                        process.stdout.write("\u001B[0;0f");
+                }
+
+                x.prototype.stop = function () {
+                        stop = true;
+                }
+
+                x.prototype.pause = function (int) {
+                        pause = int;
+                }
+
+                x.prototype.resume = function () {
+                        pause = false;
+                }
+
+                return x;
+        })();
+
         /**
          *  Initialize the server (express) and create the routes and register
          *  the handlers.
@@ -383,7 +527,10 @@ var ChatApp = function() {
                         self.server = require('https').createServer(svrOptions, self.app);
                 }
 
-                self.io = require('socket.io').listen(self.server);
+                try {
+                        self.io = require('socket.io').listen(self.server);
+                } catch(e) { self.slow.reset(), self.slow.setState("Please install socket.io."), process.reallyExit() }
+
                 self.chats = {};
                 self.chats['DaveChat'] = self.createChat('DaveChat');
                 self.listenForConnections();
