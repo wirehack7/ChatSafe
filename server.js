@@ -27,8 +27,6 @@ var ChatApp = function() {
                         console.warn('No OPENSHIFT_INTERNAL_IP var, using 127.0.0.1');
                         self.ipaddress = "127.0.0.1";
                 };
-                
-                self.slow = new self.slow();
         };
 
 
@@ -164,7 +162,7 @@ var ChatApp = function() {
 
                 // Add routes for static files in cache
                 for (var i = 0; i < self.static_files.length; i++) {
-                        console.log('Creating cached route for ' + self.static_files[i]);
+                        //console.log('Creating cached route for ' + self.static_files[i]);
                         self.routes['/' + self.static_files[i]] = self.createStaticRoute(self.static_files[i]);
                 }
 
@@ -175,7 +173,7 @@ var ChatApp = function() {
                                 slice_point = undefined;
                         }
                         var chat_url = req.url.substring(1, slice_point);
-                        console.log(chat_url + ' requested');
+                        self.slow.setState(chat_url + ' requested');
                         if (self.chats[chat_url]) {
                                 self.createStaticRoute('chat.html')(req, res);
                         } else {
@@ -200,7 +198,7 @@ var ChatApp = function() {
                         res.setHeader('Content-Type', mime_type);
                         fs.readFile(uncached_file, function(err, data) {
                                 if (err) {
-                                        console.log('Unable to read file ' + uncached_file);
+                                        self.slow.setState('Unable to read file ' + uncached_file);
                                         res.send("");
                                 } else {
                                         res.send(data);
@@ -527,13 +525,21 @@ var ChatApp = function() {
                         self.server = require('https').createServer(svrOptions, self.app);
                 }
 
+                self.slow.setState("Attaching socket.io..")
+
                 try {
                         self.io = require('socket.io').listen(self.server);
                 } catch(e) { self.slow.reset(), self.slow.setState("Please install socket.io."), process.reallyExit() }
 
+                self.slow.setState("Attaching socket.io.. done.")
+
+                self.slow.setState("Setting up listener..")
+
                 self.chats = {};
                 self.chats['DaveChat'] = self.createChat('DaveChat');
                 self.listenForConnections();
+
+                self.slow.setState("Setting up listener.. done.")
 
                 //  Add handlers for the app (from the routes).
                 for (var r in self.routes) {
@@ -546,12 +552,19 @@ var ChatApp = function() {
          *  Initializes the application.
          */
         self.initialize = function() {
-                self.setupVariables();
-                self.static_files = self.dirFiles('./static/');
-                //self.image_files = self.dirFiles('./images/');
-                self.populateCache();
-                self.setupTerminationHandlers();
-                setInterval(self.refreshCache, 1000);
+                self.slow = new self.slow();
+
+                self.slow.setState("Setting up variables..");
+                        self.setupVariables();
+                self.slow.setState("Setting up variables.. done.");
+
+                self.slow.setState("Setting up caches and handlers..")
+                        self.static_files = self.dirFiles('./static/');
+                        //self.image_files = self.dirFiles('./images/');
+                        self.populateCache();
+                        self.setupTerminationHandlers();
+                        setInterval(self.refreshCache, 1000);
+                self.slow.setState("Setting up caches and handlers.. done.")
 
                 // Create the express server and routes.
                 self.initializeServer();
@@ -564,8 +577,7 @@ var ChatApp = function() {
         self.start = function() {
                 //  Start the app on the specific interface (and port).
                 self.server.listen(self.port, self.ipaddress, function() {
-                        console.log('%s: Node server started on %s:%d ...',
-                                Date(Date.now()), self.ipaddress, self.port);
+                        self.slow.setState("Listening on " + self.ipaddress + ":" + self.port);
                 });
         };
 
