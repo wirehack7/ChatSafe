@@ -32,7 +32,7 @@ The following steps will allow you to use ChatSafe securely:
   can read messages, as it does not have the encryption key.
 
   In case somebody does manage to get your chat URL, with the key to decrypt the messages, the lock feature can be used
-  to stop any new members from joining the chat, so they cannot access the messages. The chat is deleted from the server 
+  to stop any new members from joining the chat, so they cannot access the messages. The chat is deleted from the server
   once all members have left.
 
 ##Why was ChatSafe created
@@ -53,3 +53,7 @@ The following steps will allow you to use ChatSafe securely:
 
   You don't have to. ChatSafe is open source software, meaning anybody can 
   <a href="https://github.com/DavidTimms/ChatSafe">view the source code</a>, so you can check that it does what I say it does.
+  
+##SSL connection
+
+ChatSafe now uses an SSL connection for an extra layer of security. If you wish to host your own version, put the SSL keys in the ```keys``` folder: *ssl.key* for private, *ssl.crt* for the certificate and for CA *ca.unified.pem*.
