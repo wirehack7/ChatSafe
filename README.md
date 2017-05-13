@@ -1,8 +1,8 @@
-#ChatSafe
+# ChatSafe
 
 A secure chat room service based on Node.js, Socket.io and AngularJS with AES encryption
 
-##How to use ChatSafe
+## How to use ChatSafe
 
 The following steps will allow you to use ChatSafe securely:
 
@@ -19,7 +19,7 @@ The following steps will allow you to use ChatSafe securely:
   5.  When you finish your conversation, click 'unlock chat' and when prompted click 'yes' to clear all messages 
       from the chat.
 
-##How it works
+## How it works
 
   When you create a chat, a random key is generated and stored in the hash part of the URL. That's the part which
   your browser can see but is not sent over the internet to the server. This key used to encrypt your messages 
@@ -35,14 +35,14 @@ The following steps will allow you to use ChatSafe securely:
   to stop any new members from joining the chat, so they cannot access the messages. The chat is deleted from the server
   once all members have left.
 
-##Why was ChatSafe created
+## Why was ChatSafe created
 
   People have a right to communicate in private without being tracked, recorded or monitored. Chatsafe provides 
   a simple, fast, browser-based instant messaging service for people to do this.</p><p> You shouldn't have to trust any
   external service to protect your communication data. With ChatSafe, even if somebody has access to our servers
   they cannot read your messages.
 
-##Who Created ChatSafe
+## Who Created ChatSafe
 
   ChatSafe was created by 
   <a href="http://www.davidtimms.co.uk">David Timms</a>,
@@ -54,6 +54,6 @@ The following steps will allow you to use ChatSafe securely:
   You don't have to. ChatSafe is open source software, meaning anybody can 
   <a href="https://github.com/DavidTimms/ChatSafe">view the source code</a>, so you can check that it does what I say it does.
   
-##SSL connection
+## SSL connection
 
 ChatSafe now uses an SSL connection for an extra layer of security. If you wish to host your own version, put the SSL keys in the ```keys``` folder: *ssl.key* for private, *ssl.crt* for the certificate and for CA *ca.unified.pem*.
