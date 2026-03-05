@@ -1,226 +1,201 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en-GB" ng-app>
-	<head>
-		<title>ChatSafe</title>
-		<meta name="viewport" content="width=350, user-scalable=no" />
-		<!--<link href="bootstrap-combined.min.css" rel="stylesheet">-->
-		<link href="//hnetdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet" />
-		<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
-		<style>
-			html {
-				overflow-y: scroll;
-			}
-			body {
-				min-width: 300px;
-				padding-bottom: 20px;
-			}
-			.container {
-				max-width: 550px;
-			}
-			.logo {
-				width: 342px;
-				height: 251px;
-				margin-bottom: 30px;
-			}
-			.hero-unit {
-				padding-bottom: 45px;
-				text-align: center;
-				/*
-				padding: 60px 0px;
-				*/
-			}
-			@media screen and (max-width: 500px) {
-				.logo {
-					height: auto;
-				}
-				.hero-unit {
-					padding-left: 30px;
-					padding-right: 30px;
-				}
-			}
-			.input-append input {
-				font-size: 16px;
-			}
-			@media screen and (min-width: 500px) {
-				#chat_name {
-					width: 270px;
-				}
-			}
-			alert {
-				text-align: left;
-			}
-			.info-links {
-				text-align: center;
-				height: 45px;
-			}
-			.info-links a {
-				display: inline-block;
-				width: 30%;
-				font-size: 125%;
-				color: gray;
-			}
-			.section {
-				border-top: 1px solid rgb(238, 238, 238);
-				display: none;
-				min-height: 615px;
-			}
-		</style>
-		<script>
-			function generateKey () {
-				var key = '';
-				for (var i = 0; i < 64; i += 1) {
-					var code = 55 + Math.floor(Math.random()*36);
-					if (code < 65) code -= 7;
-					key += String.fromCharCode(code);
-				}
-				return key;
-			};
+<html lang="de" data-theme="">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="ChatSafe – Sicherer, Ende-zu-Ende-verschlüsselter Instant-Messenger im Browser." />
+  <title>ChatSafe – Sicher chatten</title>
+  <link rel="stylesheet" href="style.css" />
+  <script>
+    // Apply theme immediately to prevent flash
+    (function () {
+      var stored = localStorage.getItem('cs-theme');
+      var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.dataset.theme = stored || (prefersDark ? 'dark' : 'light');
+    })();
+  </script>
+</head>
+<body>
+  <div class="landing">
 
-			$(document).ready(function () {
-				$('.alert').hide();
-				$('#new_chat_form').submit(function (e) {
-					e.preventDefault();
-					var chat_name = $('#chat_name').val()
-						.split(' ').join('_')
-						.split('.').join('_')
-						.split('?').join('_')
-						.split('&').join('_')
-						.split('/').join('_');
-					$.getJSON('new/' + chat_name, function(res) {
-						if (res.error) {
-							console.log(res.error);
-							$('.alert').html(res.error).fadeIn(250);
-						}
-						else {
-							window.location = res.redirect + '#' + generateKey();
-						}
-					});
-				});
-				$.fn.customShow = function (speed) {
-			        this.show().find("p, h1, h2, h3, h4, li, button").each(function (i) {
-				        var elem = $(this).css({position: "relative", opacity: "0", left: "120px"})
-						setTimeout(function () {
-							elem.animate({opacity: "1", left: "0px"}, speed);
-						}, i*40);
-			        });
-			    }
-				var showSection = function (e) {
-					console.log(location.hash);
-					if (!showSection.running && $(location.hash).get(0)) {
-						showSection.running = true;
-						if (!showSection.first_shown) {
-							var sec = location.hash;
-							$(sec).fadeIn(500);
-							showSection.curr_section = sec;
-							showSection.first_shown = true;
-							console.log('first shown');
-							showSection.running = false;
-						}
-						else {
-							$(showSection.curr_section).fadeOut(200, function () {
-								var sec = location.hash;
-								$(sec).fadeIn(500);
-								showSection.curr_section = sec;
-								showSection.running = false;
-							});
-						}
-					}
-				};
-				window.onload = showSection;
-				window.onhashchange = showSection;
-				$('.info-links a').click(showSection);
-			});
-		</script>
-	</head>
-	<body>
-		<div class="container">
-			<div class="hero-unit">
-				<!--<h1>ChatSafe</h1>
-				<p>Chat with anyone, anywhere, securely</p>
-				<br />-->
-				<img src="chatsafe_medium.png" class="logo" />
-				<div class="alert alert-error">
-					Your Browser does not support ChatSafe
-				</div>
-				<h4>Simple encrypted instant messaging</h4><br />
-				<form class="input-append" id="new_chat_form">
-					<input type="text" class="input-xlarge" 
-						placeholder="Pick a title for your chat" id="chat_name" name="chat_name" />
-					<input type="submit" class="btn btn-inverse" value="Chat" />
-				</form>
-			</div>
-			<div class="info-links">
-				<a href="#how">How?</a>
-				<a href="#why">Why?</a>
-				<a href="#who">Who?</a>
-			</div>
-			<div class="section" id="how">
-				<h2>How to use ChatSafe</h2>
-				<p>
-					The following steps will allow you to use ChatSafe securely:
-					<ol>
-						<li>
-							Use private/incognito browsing mode.
-						</li>
-						<li>
-							Create a chat using the box on the homepage.
-						</li>
-						<li>
-							Send the address of the newly created chat to anyone you want to chat with. This address contains the
-							key to the chat, so keep it safe. I recommend using <a href="https://privnote.com/">privnote</a> to send 
-							the address.
-						</li>
-						<li>
-							Once everyone has joined the chat, click the 'lock chat' button on the left of the chat page.
-						</li>
-						<li>
-							When you finish your conversation, click 'unlock chat' and when prompted click 'yes' to clear all messages 
-							from the chat.
-						</li>
-					</ol>
-				</p>
-				<h2>How it works</h2>
-				<p>
-					When you create a chat, a random key is generated and stored in the hash part of the URL. That's the part which
-					your browser can see but is not sent over the internet to the server. This key used to encrypt your messages 
-					in your browser before they are sent to the server. Once the message reaches the other members of the chat,
-					their browsers will get the key from the URL you sent them to join the chat, and use it to decrypt the message
-					back to its original form.
-				</p>
-				<p>
-					All encryption is done using the <a href="https://github.com/mdp/gibberish-aes">Gibberish AES</a> library, so it
-					follows the 256 bit AES specification. Because all encryption is done in the browser, not even the ChatSafe server 
-					can read messages, as it does not have the encryption key.
-				</p>
-				<p>
-					In case somebody does manage to get your chat URL, with the key to decrypt the messages, the lock feature can be used
-					to stop any new members from joining the chat, so they cannot access the messages. The chat is deleted from the server 
-					once all members have left.
-				</p>
-			</div>
-			<div class="section" id="why">
-				<h2>Why ChatSafe was created</h2>
-				<p>
-					People have a right to communicate in private without being tracked, recorded or monitored. Chatsafe provides 
-					a simple, fast, browser-based instant messaging service for people to do this.</p><p> You shouldn't have to trust any
-					external service to protect your communication data. With ChatSafe, even if somebody has access to our servers
-					they cannot read your messages.
-				</p>
-			</div>
-			<div class="section" id="who">
-				<h2>Who Created ChatSafe?</h2>
-				<p>
-					ChatSafe was created by 
-					<a href="http://www.davidtimms.co.uk">David Timms</a>,
-					a student and web developer from Bristol, UK. If you have any questions or feedback about the site, send me a message on 
-					<a href="http://www.davidtimms.co.uk">my website</a>.
-				</p>
-				<h2>Can I trust you?</h2>
-				<p>
-					You don't have to. ChatSafe is open source software, meaning anybody can 
-					<a href="https://github.com/DavidTimms/ChatSafe">view the source code</a>, so you can check that it does what I say it does.
-  				</p>
-			</div>
-		</div>
-	</body>
+    <!-- Theme Toggle (top-right) -->
+    <button class="theme-toggle landing-theme-toggle" id="themeToggle" title="Dark/Light Mode">
+      <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    </button>
+
+    <div class="landing-card">
+      <!-- Logo -->
+      <div class="landing-logo">
+        <div class="logo-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+        </div>
+        <h1>ChatSafe</h1>
+        <p>Ende-zu-Ende-verschlüsselte Chats&nbsp;— direkt im Browser</p>
+      </div>
+
+      <!-- Create Chat Form -->
+      <form class="landing-form" id="newChatForm" novalidate>
+        <div id="landingError" class="landing-error" role="alert"></div>
+        <input
+          class="input"
+          type="text"
+          id="chatName"
+          name="chatName"
+          placeholder="Name für deinen Chat …"
+          maxlength="50"
+          autocomplete="off"
+          required
+        />
+        <button class="btn btn-primary btn-lg btn-full" type="submit" id="createBtn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Chat erstellen
+        </button>
+      </form>
+
+      <hr class="landing-divider" />
+
+      <!-- Info Tabs -->
+      <div class="info-tabs">
+        <button class="info-tab" data-target="how">Wie?</button>
+        <button class="info-tab" data-target="why">Warum?</button>
+        <button class="info-tab" data-target="who">Wer?</button>
+      </div>
+
+      <div class="info-section" id="how">
+        <h2>So nutzt du ChatSafe sicher</h2>
+        <ol>
+          <li>Öffne ChatSafe im <strong>privaten/Inkognito-Modus</strong>.</li>
+          <li>Gib deinem Chat einen Namen und klicke auf <em>Chat erstellen</em>.</li>
+          <li>Sende die generierte URL an alle, die teilnehmen sollen – sie enthält den Verschlüsselungsschlüssel.</li>
+          <li>Sobald alle beigetreten sind: Chat <strong>sperren</strong>, damit keine weiteren Personen eintreten können.</li>
+          <li>Am Ende: entsperren, Nachrichten löschen und fertig.</li>
+        </ol>
+        <h2>So funktioniert die Verschlüsselung</h2>
+        <p>
+          Beim Erstellen wird ein kryptografisch sicherer Zufallsschlüssel generiert und im
+          URL-Hash gespeichert – der Teil, den der Browser <em>nicht</em> ans Server überträgt.
+          Alle Nachrichten werden per <strong>AES-256-GCM</strong> (Web Crypto API) im Browser
+          ver- und entschlüsselt. Der Server sieht niemals den Klartext.
+        </p>
+      </div>
+
+      <div class="info-section" id="why">
+        <h2>Warum ChatSafe?</h2>
+        <p>
+          Privatsphäre ist ein Grundrecht. ChatSafe ermöglicht schnelle, verschlüsselte
+          Unterhaltungen ohne Account, ohne Tracking und ohne dass ein Dienst deine
+          Nachrichten lesen kann – selbst wenn der Server kompromittiert ist.
+        </p>
+      </div>
+
+      <div class="info-section" id="who">
+        <h2>Wer steckt dahinter?</h2>
+        <p>
+          ChatSafe wurde ursprünglich von
+          <a href="https://github.com/DavidTimms/ChatSafe" target="_blank" rel="noopener">David Timms</a>
+          entwickelt und ist quelloffen – du kannst den Code jederzeit selbst prüfen.
+        </p>
+        <h2>Muss ich dir vertrauen?</h2>
+        <p>Nein. Schau dir einfach den <a href="https://github.com/DavidTimms/ChatSafe" target="_blank" rel="noopener">Quellcode</a> an.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    'use strict';
+
+    /* ---- Theme ---- */
+    function getTheme() {
+      var stored = localStorage.getItem('cs-theme');
+      if (stored) return stored;
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    function applyTheme(t) {
+      document.documentElement.dataset.theme = t;
+      localStorage.setItem('cs-theme', t);
+    }
+    document.getElementById('themeToggle').addEventListener('click', function () {
+      applyTheme(getTheme() === 'dark' ? 'light' : 'dark');
+    });
+
+    /* ---- Info Tabs ---- */
+    var tabs = document.querySelectorAll('.info-tab');
+    var sections = document.querySelectorAll('.info-section');
+    var activeTab = null;
+
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        var target = tab.dataset.target;
+        if (activeTab === target) {
+          // Toggle off
+          tab.classList.remove('active');
+          document.getElementById(target).classList.remove('visible');
+          activeTab = null;
+          return;
+        }
+        tabs.forEach(function (t) { t.classList.remove('active'); });
+        sections.forEach(function (s) { s.classList.remove('visible'); });
+        tab.classList.add('active');
+        document.getElementById(target).classList.add('visible');
+        activeTab = target;
+      });
+    });
+
+    /* ---- Key Generation (Web Crypto API) ---- */
+    function generateKey() {
+      var bytes = new Uint8Array(48);
+      crypto.getRandomValues(bytes);
+      return btoa(String.fromCharCode.apply(null, bytes))
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=/g, '');
+    }
+
+    /* ---- Chat Creation ---- */
+    var form    = document.getElementById('newChatForm');
+    var input   = document.getElementById('chatName');
+    var errBox  = document.getElementById('landingError');
+    var createBtn = document.getElementById('createBtn');
+
+    function showError(msg) {
+      errBox.textContent = msg;
+      errBox.classList.add('visible');
+    }
+    function clearError() { errBox.classList.remove('visible'); }
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      clearError();
+
+      var raw = input.value.trim();
+      if (!raw) { showError('Bitte gib einen Chat-Namen ein.'); input.focus(); return; }
+
+      var chatId = raw.replace(/[^a-zA-Z0-9_\- ]/g, '').replace(/ /g, '_').slice(0, 50);
+      if (!chatId) { showError('Ungültiger Chat-Name.'); input.focus(); return; }
+
+      createBtn.disabled = true;
+      createBtn.innerHTML = '<span class="spinner"></span> Erstelle …';
+
+      fetch('/new/' + encodeURIComponent(chatId))
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          if (data.error) {
+            showError(data.error);
+            createBtn.disabled = false;
+            createBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Chat erstellen';
+          } else {
+            window.location.href = '/' + data.redirect + '#' + generateKey();
+          }
+        })
+        .catch(function () {
+          showError('Verbindungsfehler. Bitte versuche es erneut.');
+          createBtn.disabled = false;
+          createBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Chat erstellen';
+        });
+    });
+  </script>
+</body>
 </html>
