@@ -1,0 +1,53 @@
+{
+  "env": {
+    "node": true,
+    "es2022": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 2022,
+    "sourceType": "commonjs"
+  },
+  "rules": {
+    "strict": ["error", "global"],
+    "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+    "no-undef": "error",
+    "eqeqeq": "error",
+    "no-var": "error",
+    "prefer-const": "error"
+  },
+  "overrides": [
+    {
+      "files": ["static/**/*.js"],
+      "env": {
+        "browser": true,
+        "node": false,
+        "es2022": true
+      },
+      "globals": {
+        "io": "readonly",
+        "socket": "writable"
+      },
+      "parserOptions": {
+        "ecmaVersion": 2022,
+        "sourceType": "script"
+      },
+      "rules": {
+        "strict": "off",
+        "no-var": "off",
+        "prefer-const": "off",
+        "no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }]
+      }
+    },
+    {
+      "files": ["tests/**/*.js"],
+      "env": {
+        "node": true,
+        "jest": true,
+        "es2022": true
+      },
+      "rules": {
+        "strict": "off"
+      }
+    }
+  ]
+}

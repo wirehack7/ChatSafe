@@ -272,9 +272,13 @@ setInterval(() => {
   }
 }, 60 * 60 * 1000);
 
-server.listen(PORT, HOST, () => {
-  console.log(`ChatSafe listening on http://${HOST}:${PORT}`);
-});
+if (require.main === module) {
+  server.listen(PORT, HOST, () => {
+    console.log(`ChatSafe listening on http://${HOST}:${PORT}`);
+  });
 
-process.on('SIGTERM', () => server.close(() => process.exit(0)));
-process.on('SIGINT', () => server.close(() => process.exit(0)));
+  process.on('SIGTERM', () => server.close(() => process.exit(0)));
+  process.on('SIGINT', () => server.close(() => process.exit(0)));
+}
+
+module.exports = { app, server, chats, sanitize, toChatId };
