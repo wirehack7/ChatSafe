@@ -1,103 +1,172 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en-GB" ng-app>
-	<head>
-		<title>ChatSafe</title>
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<!--<link href="bootstrap-combined.min.css" rel="stylesheet">-->
-		<link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet" />
-		<link href="style.css" rel="stylesheet" />
-		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
-		<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.6/angular.min.js"></script>
-		<script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
-		<script src="/socket.io/socket.io.js"></script>
-		<script src="gibberish-aes-1.0.0.min.js"></script>
-		<script src="chat.js"></script>
-	</head>
-	<body>
-		<div class="container" ng-controller="Chat">
+<html lang="de" data-theme="">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ChatSafe</title>
+  <link rel="stylesheet" href="style.css" />
+  <script>
+    (function () {
+      var stored = localStorage.getItem('cs-theme');
+      var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.dataset.theme = stored || (prefersDark ? 'dark' : 'light');
+    })();
+  </script>
+</head>
+<body>
 
-		    <div class="left-column">
-		    	<button class="btn compact-only" ng-click="hideSidebar()"><i class="icon-chevron-left"></i></button>
-		    	<img src="chatsafe.png" class="logo" />
-		    	<ul class="nav nav-tabs nav-stacked">
-					<li ng-repeat="chatter in chatters">
-			        	<a class="color-{{chatter.id % 6}} {{chatter.isMe()}}">{{chatter.name}}</a>
-			    	</li>
-			    </ul>
-			    <button class="btn btn-danger" ng-show="my_username" ng-click="clearMessages()">
-			    	<i class="icon-trash icon-white"></i> Clear Messages
-			    </button><br />
-			    <button class="btn" ng-class="{'btn-success': locked}" ng-show="my_username" ng-click="toggleLocked()">
-			    	<i class="icon-lock" ng-class="{'icon-white': locked}"></i>
-			    	<span ng-show="locked">Unlock</span>
-			    	<span ng-hide="locked">Lock</span>
-			    	Chat
-			    </button><br />
-			    <button class="btn" ng-show="my_username" ng-click="leaveChat()">
-			    	<i class="icon-arrow-left"></i> Leave Chat
-			    </button><br />
-			    <a class="hidden" href="#username_modal" ng-show="my_username" data-toggle="modal">
-			    	Change Username
-			    </a>
-		    </div>
+<!-- ============================================================
+     APP SHELL
+     ============================================================ -->
+<div class="chat-app">
 
-		    <div class="right-column">
-				<div class="title-bar">
-					<button class="btn compact-only" ng-show="my_username" ng-click="showSidebar()">
-						<i class="icon-chevron-right"></i>
-					</button>
-					<h1>{{chat_name}}</h1>
-				</div>
-				<div class="messages-box" id="messages-box">
-					<div class="message row-fluid" ng-hide="messages.length > 0">
-						<div class="message-text">
-							Securely send this address to the people you want to chat with: <br /><br />
-							<input type="text" style="width: 97%" value="{{page_url}}" />
-						</div>
-					</div>
-					<div class="message row-fluid color-{{chatters.get(message.sender).id % 6}} {{chatters.get(message.sender).isMe()}}" ng-repeat="message in messages | orderBy: 'time'">
-			        	<strong class="sender span3"><!--ng-hide="message.sender == undefined"-->{{message.sender}}<small>{{message.timeString()}}</small></strong>
-			        	<div class="message-text span9">{{message.text}}</div>
-			    	</div>
-				</div>
-				<form class="chat-box"ng-submit="sendMessage()">
-					<textarea id="message_textarea"  ng-show="my_username" ng-model="message_text"></textarea>
-					<input type="submit" value="send" class="btn"  ng-show="my_username" />
-			    	<button data-target="#username_modal" class="btn btn-large" ng-hide="locked || my_username" data-toggle="modal">
-			    		Join the conversation
-			    	</button>
-				</form>
-		    </div>
-		    <!-- Username Modal -->
-		    <div id="username_modal" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-					<h3>Set Username</h3>
-				</div>
-				<div class="modal-body">
-					<div class="alert alert-error" ng-show="username_error">{{username_error}}</div>
-			    	<input class="username" type="text" placeholder="Type a username here" ng-model="new_username" ng-disabled="join_loading" />
-				</div>
-				<div class="modal-footer">
-					<i class="icon-loading" ng-show="join_loading"></i> 
-					<button class="btn btn-inverse" ng-disabled="join_loading" ng-click="setUsername()">Join</button>
-				</div>
-			</div>
+  <!-- Mobile sidebar overlay -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-		    <!-- Confirm Modal -->
-		    <div id="confirm_modal" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-					<h3>{{confirm_modal.title}}</h3>
-				</div>
-				<div class="modal-body">
-					{{confirm_modal.message}}
-				</div>
-				<div class="modal-footer">
-					<button href="#" class="btn" ng-click="confirm_modal.respond(false)">No</button>
-					<button href="#" class="btn btn-inverse" ng-click="confirm_modal.respond(true)">Yes</button>
-				</div>
-			</div>
-		</div>
-	</body>
+  <!-- ---- Sidebar ---- -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+      </div>
+      <span class="sidebar-title" id="sidebarRoomName">ChatSafe</span>
+      <button class="btn-icon hamburger" id="sidebarClose" title="Schließen">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="sidebar-body">
+      <div class="sidebar-section-label">Teilnehmer</div>
+      <div class="user-list" id="userList">
+        <!-- Injected by app.js -->
+      </div>
+    </div>
+
+    <div class="sidebar-actions">
+      <button class="btn btn-ghost" id="lockBtn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="lockIcon"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <span id="lockLabel">Chat sperren</span>
+      </button>
+      <button class="btn btn-danger" id="clearBtn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        Nachrichten löschen
+      </button>
+      <button class="btn btn-ghost" id="leaveBtn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Chat verlassen
+      </button>
+      <button class="theme-toggle btn-full" id="themeToggle" style="margin-top:4px;" title="Dark/Light Mode">
+        <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        Dark Mode
+      </button>
+    </div>
+  </aside>
+
+  <!-- ---- Main ---- -->
+  <main class="chat-main">
+
+    <!-- Header -->
+    <header class="chat-header">
+      <button class="btn-icon hamburger" id="hamburgerBtn" title="Menü">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div class="chat-header-info">
+        <div class="chat-header-name" id="headerRoomName">Laden …</div>
+        <div class="chat-header-meta">
+          <span id="headerUserCount">0 Teilnehmer</span>
+          <span class="lock-badge" id="lockBadge">
+            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Gesperrt
+          </span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="theme-toggle" id="headerThemeToggle" title="Dark/Light Mode">
+          <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Messages -->
+    <div class="messages-area" id="messagesArea">
+      <!-- Invite banner shown before any messages -->
+      <div class="invite-banner" id="inviteBanner" style="display:none;">
+        <strong>🔗 Chat-Link teilen</strong>
+        Sende diesen Link an alle, die teilnehmen sollen. Der Link enthält den Verschlüsselungsschlüssel.
+        <input class="invite-url" id="inviteUrl" type="text" readonly />
+      </div>
+    </div>
+
+    <!-- Input Area -->
+    <div class="chat-input-area" id="inputArea">
+      <div class="join-prompt" id="joinPrompt" style="display:none;">
+        <button class="btn btn-primary" id="joinBtn">Dem Chat beitreten</button>
+      </div>
+      <textarea
+        class="chat-textarea"
+        id="messageInput"
+        placeholder="Nachricht eingeben … (Enter zum Senden)"
+        rows="1"
+        maxlength="5000"
+        style="display:none;"
+      ></textarea>
+      <button class="send-btn" id="sendBtn" style="display:none;" disabled title="Senden">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
+    </div>
+
+  </main>
+</div>
+
+<!-- ============================================================
+     MODALS
+     ============================================================ -->
+
+<!-- Join Modal -->
+<div class="modal-overlay" id="joinModal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="joinModalTitle">
+    <div class="modal-title" id="joinModalTitle">Dem Chat beitreten</div>
+    <p class="modal-subtitle">Wähle einen Benutzernamen für diese Sitzung.</p>
+    <div class="modal-body">
+      <input
+        class="input"
+        type="text"
+        id="usernameInput"
+        placeholder="Dein Benutzername …"
+        maxlength="30"
+        autocomplete="off"
+      />
+      <div class="modal-error" id="joinError"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" id="joinConfirmBtn">
+        Beitreten
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Modal -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+    <div class="modal-title" id="confirmTitle">Bist du sicher?</div>
+    <p class="modal-subtitle" id="confirmMessage"></p>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="confirmNo">Nein</button>
+      <button class="btn btn-danger" id="confirmYes">Ja</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Scripts -->
+<script src="/socket.io/socket.io.js"></script>
+<script src="app.js"></script>
+</body>
 </html>

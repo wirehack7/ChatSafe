@@ -1,33 +1,23 @@
 {
-  "name": "ChatSafe",
-  "version": "0.2.0",
-  "description": "ChatSafe Encrypted Instant Messaging App",
-  "keywords": [
-    "Node.js",
-    "application",
-    "chat",
-    "IM",
-    "secure",
-    "encrypted"
-  ],
+  "name": "chatsafe",
+  "version": "1.0.0",
+  "description": "ChatSafe - Secure Encrypted Instant Messaging",
+  "keywords": ["chat", "secure", "encrypted", "socket.io", "e2ee"],
   "author": {
-    "name": "David Timms",
-    "email": "davidtimms@btinternet.com",
-    "url":  "http://www.davidtimms.co.uk"
+    "name": "David Timms"
   },
-  "homepage": "http://www.davidtimms.co.uk",
-
+  "license": "MIT",
   "engines": {
-    "node": ">= 0.6.0",
-    "npm": ">= 1.0.0"
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
   },
-
   "dependencies": {
-    "socket.io": "0.9.12"
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "socket.io": "^4.8.1"
   },
   "devDependencies": {},
-  "bundleDependencies": [],
-
   "private": true,
   "main": "server.js"
 }
